@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book List API Consumer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+        .book-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .book-item:last-child {
+            border-bottom: none;
+        }
+        .book-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #333;
+        }
+        .book-author {
+            font-size: 0.9em;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Book List</h1>
+        <div id="book-list-container">
+            <p>Memuat data buku...</p>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:8000/api/books';
+        const listContainer = document.getElementById('book-list-container');
+
+        async function fetchBooks() {
+            try {
+                const response = await fetch(API_URL);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const apiData = await response.json();
+
+                if (apiData.success && apiData.data) {
+                    const books = apiData.data.data;
+                    renderBookList(books);
+                } else {
+                    listContainer.innerHTML = `<p style="color: red;">Gagal mengambil data: ${apiData.message || 'Respons tidak valid.'}</p>`;
+                }
+
+            } catch (error) {
+                console.error("Terjadi kesalahan saat fetch API:", error);
+                listContainer.innerHTML = `<p style="color: red;">Kesalahan koneksi atau server: ${error.message}</p>`;
+            }
+        }
+
+        function renderBookList(books) {
+            if (books.length === 0) {
+                listContainer.innerHTML = '<p>Daftar buku kosong.</p>';
+                return;
+            }
+
+            listContainer.innerHTML = '';
+
+            books.forEach(book => {
+                const bookItem = document.createElement('div');
+                bookItem.className = 'book-item';
+                
+                const title = document.createElement('div');
+                title.className = 'book-title';
+                title.textContent = book.judul;
+                
+                const author = document.createElement('div');
+                author.className = 'book-author';
+                author.textContent = `by ${book.penulis}`;
+                
+                bookItem.appendChild(title);
+                bookItem.appendChild(author);
+                
+                listContainer.appendChild(bookItem);
+            });
+        }
+
+        fetchBooks();
+    </script>
+</body>
+</html>
